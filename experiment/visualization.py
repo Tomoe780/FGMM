@@ -14,8 +14,8 @@ def make_ellipses(ax, means, covs, edgecolor, m_color, ls='-', n_std=3):
         ell_radius_x = np.sqrt(1 + pearson)
         ell_radius_y = np.sqrt(1 - pearson)
         ellipse = mpl.patches.Ellipse((0, 0),
-                                      ell_radius_x * 2,
-                                      ell_radius_y * 2,
+                                      ell_radius_x,
+                                      ell_radius_y,
                                       facecolor='none',
                                       edgecolor=edgecolor, lw=1, ls=ls)
         scale_x = np.sqrt(cov[0, 0]) * n_std
@@ -25,7 +25,7 @@ def make_ellipses(ax, means, covs, edgecolor, m_color, ls='-', n_std=3):
         ellipse.set_transform(transf + ax.transData)
         ax.add_patch(ellipse)
         ax.add_artist(ellipse)
-        ax.set_aspect('equal', 'datalim')
+        # ax.set_aspect('equal', 'datalim')
         ax.scatter(mean[0], mean[1], c=m_color, marker='*')
     for mean, cov in zip(means, covs):
         _make_ellipses(mean, cov)

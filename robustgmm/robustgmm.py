@@ -76,6 +76,7 @@ class RobustGMM:
     def predict_proba(self, X):
         """
         Calculate posterior probability of each component given the data.
+        计算给定数据的每个分量的后验概率
 
         Args:
             X: numpy array
@@ -109,6 +110,7 @@ class RobustGMM:
     def _initialize_covmat(self):
         """
         Covariance matrix initialize function.
+        协方差矩阵初始化函数
         """
         D_mat = np.sqrt(np.sum((self.X[None, :]-self.X[:, None])**2, -1))
         self.covs = np.apply_along_axis(
@@ -208,6 +210,7 @@ class RobustGMM:
     def _check_convergence(self):
         """
         Check whether algorithm converge or not.
+        检查算法是否收敛
         """
         check = np.max(np.sqrt(np.sum((self.new_means-self.means)**2, axis=1)))
         self.means = self.new_means
@@ -216,6 +219,7 @@ class RobustGMM:
     def _check_positive_semidefinite(self, cov):
         """
         Prevent error that covariance matrix is not positive semi definite.
+        防止协方差矩阵不是正半定的错误
         """
         min_eig = np.min(np.linalg.eigvals(cov))
         if min_eig < 0:
@@ -226,6 +230,7 @@ class RobustGMM:
         """
         Record useful information in each step
         for visualization and objective function.
+        记录每一步有用的信息
         """
         result = {}
         result['means'] = self.means
@@ -244,6 +249,7 @@ class RobustGMM:
 
         """
         Calculate objective function(negative log likelihood).
+        计算目标函数（负对数似然）
         """
         likelihood = np.zeros((self.n, self.c))
         for i in range(self.c):
@@ -275,3 +281,16 @@ class RobustGMM:
         self.pi = self.pi[idx]*counts
         self.c = self.pi.shape[0]
         self.z = self.z[:, idx]*counts
+
+    def individual_fairness_penalty(self, X, gamma, sensitive_attr):
+        """
+        计算数据点之间的相似性
+        """
+        n = len(X)
+        penalty = 0
+        for i in range(n):
+            for j in range(n):
+                if i != j and sensitive_attr[i] == sensitive_attr[j]:
+                    similarity = np.linalg.norm(X[i] - X[j])
+                    penalty += np.sum((gamma[i] - gamma[j]) ** 2) / similarity
+        return penalty
